@@ -82,7 +82,7 @@ These keys set the default only. A setting that you make with `roundcube-ai-admi
 | `max_tool_bytes` | `32768` | 1000 to 1000000 | Size of all client tool definitions in one request, as JSON. |
 | `ping_interval` | `10` | 0.01 to 60 | Seconds between `: ping` lines in the chat stream. |
 | `read_max_chars` | `30000` | 1000 to 1000000 | Characters of one message or attachment that the model gets. |
-| `search_limit` | `50` | 1 to 1000 | Maximum messages in one search result. |
+| `search_limit` | `100` | 0 to 100000 | Maximum messages in one search result. The model asks for 20 messages if it does not give a number. `0` means no limit. Each message in the result goes to the model, so a high value can use many tokens. |
 | `timezone` | `""` | | Time zone of the date in the system prompt. Empty means the server time zone. |
 
 ## Commands

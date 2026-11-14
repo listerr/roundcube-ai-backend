@@ -167,3 +167,27 @@ def test_run_timeout(env, token):
     assert "took too long" in r.text
     task = env.db.task_get(int(r.headers["x-conversation-id"]), env.db.mailbox_get("rob@example.org")["id"])
     assert task["state"] == "error"
+
+
+# -- search limit ----------------------------------------------------------
+
+@pytest.mark.parametrize("configured,asked,expected", [
+    (100, None, 20), (100, 500, 100), (100, 50, 50), (0, 5000, 5000), (0, None, 20),
+])
+def test_search_limit(configured, asked, expected):
+    from rcai import tools
+
+    class Mail:
+        def search(self, **kw):
+            self.kw = kw
+            return {}
+
+    mail = Mail()
+    ctx = tools.ToolContext(None, 1, mail, configured, 1000)
+    args = {} if asked is None else {"limit": asked}
+    asyncio.run(tools._dispatch("mail_search", args, ctx))
+    assert mail.kw["limit"] == expected
+
+
+def test_search_limit_zero_is_allowed():
+    assert cfg(agent={"search_limit": 0}).agent.search_limit == 0

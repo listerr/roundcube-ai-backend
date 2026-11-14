@@ -98,7 +98,7 @@ class AgentConfig:
     max_tool_bytes: int = 32768     # all client tool definitions, as JSON
     ping_interval: float = 10.0     # seconds between ": ping" lines in the stream
     read_max_chars: int = 30000     # text of one message or attachment for the model
-    search_limit: int = 50          # maximum messages in one search result
+    search_limit: int = 100         # maximum messages in one search result; 0 = no limit
     timezone: str = ""              # e.g. "Europe/London"; empty = the server time zone
 
 
@@ -155,7 +155,7 @@ RANGES = {
     ("agent", "run_timeout"): (10, 7200),
     ("agent", "ping_interval"): (0.01, 60),
     ("agent", "read_max_chars"): (1000, 1_000_000),
-    ("agent", "search_limit"): (1, 1000),
+    ("agent", "search_limit"): (0, 100_000),
     ("agent", "daily_tokens"): (0, 10**10),
     ("agent", "max_turns"): (10, 100_000),
     ("agent", "max_tools"): (0, 128),

@@ -85,7 +85,7 @@ class ToolContext:
     db: Database
     mailbox_id: int
     mail: object                # an ImapSession (or a test double)
-    search_limit: int = 50
+    search_limit: int = 100         # 0 = no limit
     read_max_chars: int = 30000
 
     def reset_mail(self) -> None:
@@ -106,7 +106,9 @@ async def _dispatch(name: str, a: dict, ctx: ToolContext):
     if name == "mail_list_folders":
         return await run(m.folders, bool(a.get("counts")))
     if name == "mail_search":
-        limit = max(1, min(int(a.get("limit") or 20), ctx.search_limit))
+        limit = max(1, int(a.get("limit") or 20))
+        if ctx.search_limit:
+            limit = min(limit, ctx.search_limit)
         return await run(m.search, folder=_str(a, "folder") or None, from_=_str(a, "from"), to=_str(a, "to"),
                          subject=_str(a, "subject"), text=_str(a, "text"), since=_str(a, "since"),
                          before=_str(a, "before"), unseen=bool(a.get("unseen")), flagged=bool(a.get("flagged")),

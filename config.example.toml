@@ -81,5 +81,5 @@ max_tools = 32              # client tools in one request
 max_tool_bytes = 32768      # size of all client tool definitions, as JSON
 ping_interval = 10          # seconds between keep-alive lines in the stream
 read_max_chars = 30000      # text of one message or attachment
-search_limit = 50           # messages in one search result
+search_limit = 100          # messages in one search result, 0 = no limit
 timezone = "Europe/London"  # empty = the time zone of the server
