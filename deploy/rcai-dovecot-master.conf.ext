@@ -1,0 +1,49 @@
+# Dovecot 2.4: a master user for roundcube-ai-backend.
+# The agent logs in as "<user>*rcai" with the master password.
+#
+# Install:
+#   cp rcai-dovecot-master.conf.ext /etc/dovecot/conf.d/
+# Then include it in conf.d/10-auth.conf, before the other passdb includes:
+#
+#   !include rcai-dovecot-master.conf.ext
+#   !include auth-sql.conf.ext
+#
+# Dovecot runs the passdbs in the order of the configuration, so the master
+# passdb must come before all other passdb blocks. You can also put the
+# include line, or the contents of this file, elsewhere in your auth
+# configuration, if it comes before the other passdbs.
+#
+# SECURITY REQUIREMENT: a master login to a mailbox that does not exist
+# must fail. Without "result_success = continue", Dovecot does not look up
+# the target user in a passdb. Only the userdb lookup then refuses a
+# mailbox that does not exist. Test this after each change to the passdb or
+# the userdb (docs/install.md, section 2, step 8). Do not use the backend
+# if the test for a missing mailbox succeeds.
+#
+# The userdb refuses missing mailboxes if it is an SQL, LDAP or passwd-file
+# userdb that returns no row for them. A static userdb or a userdb with
+# "result_failure = continue" can accept any name.
+#
+# Do not add "result_success = continue" if your normal passdbs have
+# "skip = authenticated": they are skipped after the master login, and
+# the login then fails with code=authz_fail. If your normal passdbs do not
+# use "skip = authenticated", you can add it. Dovecot then also looks up
+# the target user in the normal passdbs.
+#
+
+auth_master_user_separator = *
+
+passdb rcai-master {
+  driver = passwd-file
+  passwd_file_path = /etc/dovecot/auth/master-users
+  master = yes
+
+  # The master password works only from these addresses:
+  # - local: connections without an IP address, for example doveadm.
+  # - others: Where the backend connects from.
+
+  # Replace 192.0.2.10 and 2001:db8::10 with the addresses of your host.
+  fields {
+    allow_real_nets = local,127.0.0.1,::1,192.0.2.10,2001:db8::10
+  }
+}

@@ -1,0 +1,85 @@
+# roundcube-ai-backend configuration.
+# Copy to /etc/roundcube-ai-backend/config.toml. The file contains secrets:
+#   chown root:rcai /etc/roundcube-ai-backend/config.toml
+#   chmod 640 /etc/roundcube-ai-backend/config.toml
+# Keys that you leave out get the default value shown here.
+
+[server]
+host = "127.0.0.1"
+port = 8085
+# The sub-URL of the nginx location. The backend accepts paths with and
+# without this prefix.
+# A random name is more difficult to find than "/rcapi". Read
+# docs/install.md, section 7.
+base_path = "/rcapi"
+# Origins of other hosts that can call the API from a browser. Empty = only
+# the same origin. If the API is a sub-URL of the webmail host
+# (recommended), keep it empty. Otherwise set the webmail origin, for
+# example ["https://webmail.example.com"].
+cors_origins = []
+# The proxy addresses whose X-Forwarded-For header the backend trusts.
+forwarded_allow_ips = "127.0.0.1"
+log_level = "info"
+max_body_bytes = 2000000    # larger request bodies get HTTP 413
+# Allow IMAP without TLS or without a certificate check, and http:// for
+# the model server. Loopback hosts (localhost, 127.0.0.1, ::1) do not need it.
+allow_insecure_transport = false
+
+[database]
+path = "/var/lib/roundcube-ai-backend/rcai.db"
+
+[imap]
+# Use a host name that matches the TLS certificate of Dovecot.
+host = "mail.example.com"
+port = 993
+security = "ssl"            # ssl, starttls or none
+tls_verify = true
+timeout = 30
+# The Dovecot master user. The agent logs in as "<login><separator><master_user>".
+master_user = "rcai"
+master_password = "CHANGE-ME"
+master_separator = "*"
+
+[auth]
+session_ttl = 28800         # seconds
+max_failures = 5            # failed logins for one login name from one address ...
+max_failures_ip = 20        # ... or for all login names from one address ...
+failure_window = 300        # ... in this many seconds, then HTTP 429
+max_concurrent_logins = 4   # password checks at the same time, then HTTP 429
+# If users log in without a domain ("rob"), the mailbox address becomes
+# rob@<default_domain>.
+default_domain = ""
+
+[access]
+# AI is off until an administrator enables the domain and the mailbox.
+# These keys turn AI on by default. A setting that you make with roundcube-ai-admin
+# overrides the default. "roundcube-ai-admin ... default" removes that setting.
+# The agent sends message text to OpenAI. Make sure that your data
+# protection rules permit this for each user before you turn it on.
+enable_all = false          # true = AI is on for all mailboxes
+enable_domains = []         # AI is on for the mailboxes at these domains, e.g. ["example.com"]
+
+[openai]
+# Empty = the environment variable OPENAI_API_KEY.
+api_key = ""
+base_url = "https://api.openai.com/v1"
+# Required. The name of a chat model that your OpenAI account can use.
+model = ""
+timeout = 300
+# Extra parameters for every request, if the model supports them:
+# params = { reasoning_effort = "low" }
+params = {}
+
+[agent]
+max_steps = 15              # model calls for one question
+max_concurrent = 4          # agent runs at the same time, then HTTP 429
+max_per_mailbox = 1         # agent runs at the same time for one mailbox
+run_timeout = 600           # seconds for one agent run, all steps
+daily_tokens = 0            # tokens per mailbox per day, 0 = no limit
+max_turns = 400             # stored turns in one conversation
+max_tools = 32              # client tools in one request
+max_tool_bytes = 32768      # size of all client tool definitions, as JSON
+ping_interval = 10          # seconds between keep-alive lines in the stream
+read_max_chars = 30000      # text of one message or attachment
+search_limit = 50           # messages in one search result
+timezone = "Europe/London"  # empty = the time zone of the server

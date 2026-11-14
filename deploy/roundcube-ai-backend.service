@@ -1,0 +1,28 @@
+[Unit]
+Description=Backend for the Roundcube ai_agent plugin
+After=network-online.target dovecot.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=rcai
+Group=rcai
+Environment=RCAI_CONFIG=/etc/roundcube-ai-backend/config.toml
+ExecStart=/opt/roundcube-ai-backend/.venv/bin/roundcube-ai-backend
+StateDirectory=roundcube-ai-backend
+# The database holds conversations, mail text and memory. Only rcai can read it.
+StateDirectoryMode=0700
+UMask=0077
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+
+[Install]
+WantedBy=multi-user.target
